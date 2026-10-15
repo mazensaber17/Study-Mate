@@ -1,16 +1,44 @@
+import 'dart:async';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../utils/app_colors.dart';
+import '../../utils/app_strings.dart';
 import '../../utils/app_styles.dart';
 import '../../utils/assets_manager.dart';
+import '../app_routes.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: isDark
@@ -30,7 +58,7 @@ class SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'SMART CAMPUS',
+              AppStrings.smartCampus.tr(),
               style: AppStyles.caption.copyWith(
                 color: isDark
                     ? AppColors.secondaryTextDark

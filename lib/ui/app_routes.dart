@@ -6,12 +6,14 @@ import 'home/home_screen.dart';
 import 'home/news/news_screen.dart';
 import 'home/settings/settings_screen.dart';
 import 'home/summarizer/summarizer_screen.dart';
+import 'onboarding/onboarding_screen.dart';
 import 'splash/splash_screen.dart';
 
 class AppRoutes {
   const AppRoutes._();
 
   static const String splash = '/';
+  static const String onboarding = '/onboarding';
   static const String registration = '/registration';
   static const String home = '/home';
   static const String news = '/news';
@@ -21,6 +23,7 @@ class AppRoutes {
 
   static final Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
+    onboarding: (_) => const OnboardingScreen(),
     registration: (_) => const RegistrationScreen(),
     home: (_) => const HomeScreen(),
     news: (_) => const NewsScreen(),
