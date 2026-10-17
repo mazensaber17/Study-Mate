@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
+
+import '../../../utils/assets_manager.dart';
 
 /// Consistent, modal feedback for authentication requests.
 class AuthFeedback {
@@ -54,8 +58,11 @@ class AuthFeedback {
     );
   }
 
-  static Future<void> showNoInternet(BuildContext context) {
-    return showDialog<void>(
+  static Future<bool> showNoInternet(
+    BuildContext context, {
+    FutureOr<void> Function()? onTryAgain,
+  }) async {
+    final shouldTryAgain = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         content: ConstrainedBox(
@@ -75,15 +82,30 @@ class AuthFeedback {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop(true);
+                      await onTryAgain?.call();
+                    },
+                    child: const Text('Try again'),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+
+    return shouldTryAgain == true;
   }
 
   static Future<void> _showMessage(
@@ -152,10 +174,13 @@ class _NoInternetIllustrationState extends State<_NoInternetIllustration>
       scale: Tween<double>(begin: 0.94, end: 1).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
       ),
-      child: SvgPicture.asset(
-        'assets/Animation/no_internet_animation.svg',
+      child: Lottie.asset(
+        AssetsManager.noInternetAnimation,
+        width: 180,
         height: 150,
         fit: BoxFit.contain,
+        repeat: true,
+        animate: true,
       ),
     );
   }

@@ -10,6 +10,7 @@ class AppLocalStorage {
   static const _boxName = 'studymate_preferences';
   static const _hasCompletedOnboardingKey = 'has_completed_onboarding';
   static const _userKey = 'user';
+  static const _isDarkModeKey = 'is_dark_mode';
 
   static late Box<dynamic> _box;
 
@@ -20,6 +21,15 @@ class AppLocalStorage {
 
   static bool get hasCompletedOnboarding =>
       _box.get(_hasCompletedOnboardingKey, defaultValue: false) as bool;
+
+  static bool? get themeMode {
+    final value = _box.get(_isDarkModeKey);
+    return value is bool ? value : null;
+  }
+
+  static Future<void> saveThemeMode(bool isDark) {
+    return _box.put(_isDarkModeKey, isDark);
+  }
 
   static Future<void> completeOnboarding() {
     return _box.put(_hasCompletedOnboardingKey, true);

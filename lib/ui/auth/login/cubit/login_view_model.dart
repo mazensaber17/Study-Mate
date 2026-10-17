@@ -15,11 +15,11 @@ class LoginViewModel extends Cubit<LoginState> {
   final AuthRepository repository;
 
   Future<void> login(String email, String password) async {
+    emit(const LoginLoadingState());
     if (!await NetworkService.hasInternetConnection()) {
       emit(const LoginErrorState(errorMessage: '', isNetworkError: true));
       return;
     }
-    emit(const LoginLoadingState());
     try {
       final response = await repository.signIn(
         email: email,
@@ -37,11 +37,11 @@ class LoginViewModel extends Cubit<LoginState> {
   }
 
   Future<void> resetPassword(String email) async {
+    emit(const LoginLoadingState());
     if (!await NetworkService.hasInternetConnection()) {
       emit(const LoginErrorState(errorMessage: '', isNetworkError: true));
       return;
     }
-    emit(const LoginLoadingState());
     try {
       await repository.resetPassword(email);
       emit(const PasswordResetSentState());

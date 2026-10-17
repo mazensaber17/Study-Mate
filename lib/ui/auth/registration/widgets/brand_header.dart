@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation_project/utils/app_colors.dart';
 import 'package:graduation_project/utils/assets_manager.dart';
+import 'package:graduation_project/utils/theme_controller.dart';
 
 class BrandHeader extends StatelessWidget {
   const BrandHeader({super.key, this.onOptionsPressed});
@@ -26,57 +27,109 @@ class BrandHeader extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+        return AnimatedBuilder(
+          animation: ThemeController.instance,
+          builder: (context, child) {
+            final sheetIsDark = Theme.of(context).brightness == Brightness.dark;
+            return Material(
+              color: sheetIsDark
+                  ? AppColors.surfaceDark
+                  : AppColors.surfaceLight,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: sheetIsDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      ListTile(
+                        leading: Icon(
+                          Icons.language_rounded,
+                          color: sheetIsDark
+                              ? AppColors.primaryDark
+                              : AppColors.primaryLight,
+                        ),
+                        title: Text(
+                          isArabic ? 'English' : 'العربية',
+                          style: TextStyle(
+                            color: sheetIsDark
+                                ? AppColors.textDark
+                                : AppColors.textLight,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          isArabic
+                              ? 'Switch to English'
+                              : 'التحويل إلى اللغة العربية',
+                          style: TextStyle(
+                            color: sheetIsDark
+                                ? AppColors.secondaryTextDark
+                                : AppColors.secondaryTextLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          if (isArabic) {
+                            await context.setLocale(const Locale('en'));
+                          } else {
+                            await context.setLocale(const Locale('ar'));
+                          }
+                        },
+                      ),
+                      SwitchListTile(
+                        secondary: Icon(
+                          sheetIsDark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          color: sheetIsDark
+                              ? AppColors.primaryDark
+                              : AppColors.primaryLight,
+                        ),
+                        title: Text(
+                          sheetIsDark ? 'Dark mode' : 'Light mode',
+                          style: TextStyle(
+                            color: sheetIsDark
+                                ? AppColors.textDark
+                                : AppColors.textLight,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Switch app theme',
+                          style: TextStyle(
+                            color: sheetIsDark
+                                ? AppColors.secondaryTextDark
+                                : AppColors.secondaryTextLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                        value: sheetIsDark,
+                        onChanged: ThemeController.instance.setDarkMode,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 18),
-                ListTile(
-                  leading: Icon(
-                    Icons.language_rounded,
-                    color: isDark ? AppColors.primaryDark : AppColors.primaryLight,
-                  ),
-                  title: Text(
-                    isArabic ? 'English' : 'العربية',
-                    style: TextStyle(
-                      color: isDark ? AppColors.textDark : AppColors.textLight,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  subtitle: Text(
-                    isArabic ? 'Switch to English' : 'التحويل إلى اللغة العربية',
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.secondaryTextDark
-                          : AppColors.secondaryTextLight,
-                      fontSize: 12,
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    if (isArabic) {
-                      await context.setLocale(const Locale('en'));
-                    } else {
-                      await context.setLocale(const Locale('ar'));
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

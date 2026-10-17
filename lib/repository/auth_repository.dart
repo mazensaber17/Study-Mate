@@ -4,7 +4,7 @@ import '../model/student_model.dart';
 import '../utils/app_strings.dart';
 
 class AuthRepository {
-  AuthRepository({SupabaseClient? client}) : _client = client;
+  AuthRepository({this._client});
 
   final SupabaseClient? _client;
 

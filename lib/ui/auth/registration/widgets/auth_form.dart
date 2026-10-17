@@ -189,75 +189,20 @@ class _AuthFormState extends State<AuthForm> {
               ),
               const SizedBox(height: 14),
 
-              // 4. Row: Department (flex 3) + Semester (flex 2)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: CustomDropdownField<String>(
-                      label: AppStrings.department.tr(),
-                      hint: AppStrings.departmentHint.tr(),
-                      value: _selectedDepartment,
-                      items: [
-                        DropdownOption(
-                          value: 'CS',
-                          label: AppStrings.deptCs.tr(),
-                        ),
-                        DropdownOption(
-                          value: 'IS',
-                          label: AppStrings.deptIs.tr(),
-                        ),
-                        DropdownOption(
-                          value: 'AI',
-                          label: AppStrings.deptAi.tr(),
-                        ),
-                        DropdownOption(
-                          value: 'IT',
-                          label: AppStrings.deptIt.tr(),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedDepartment = value;
-                        });
-                      },
-                      validator: (val) => AppValidator.requiredSelection(
-                        val,
-                        AppStrings.selectDepartment,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: CustomDropdownField<String>(
-                      label: AppStrings.semester.tr(),
-                      hint: AppStrings.semesterHint.tr(),
-                      value: _selectedSemester,
-                      items: [
-                        DropdownOption(
-                          value: 'S1',
-                          label: AppStrings.semester1.tr(),
-                        ),
-                        DropdownOption(
-                          value: 'S2',
-                          label: AppStrings.semester2.tr(),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedSemester = value;
-                        });
-                      },
-                      validator: (val) => AppValidator.requiredSelection(
-                        val,
-                        AppStrings.selectSemester,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              // 4. Department and semester adapt to the available width.
+              if (isCompact) ...[
+                _departmentField(),
+                const SizedBox(height: 14),
+                _semesterField(),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 3, child: _departmentField()),
+                    const SizedBox(width: 12),
+                    Expanded(flex: 2, child: _semesterField()),
+                  ],
+                ),
               const SizedBox(height: 14),
 
               // 5. Password Field
@@ -319,7 +264,10 @@ class _AuthFormState extends State<AuthForm> {
                     );
                   } else if (state is RegistrationErrorState) {
                     if (state.isNetworkError) {
-                      await AuthFeedback.showNoInternet(context);
+                      await AuthFeedback.showNoInternet(
+                        context,
+                        onTryAgain: _submit,
+                      );
                       return;
                     }
                     final message =
@@ -371,6 +319,38 @@ class _AuthFormState extends State<AuthForm> {
           );
         },
       ),
+    );
+  }
+
+  Widget _departmentField() {
+    return CustomDropdownField<String>(
+      label: AppStrings.department.tr(),
+      hint: AppStrings.departmentHint.tr(),
+      value: _selectedDepartment,
+      items: [
+        DropdownOption(value: 'CS', label: AppStrings.deptCs.tr()),
+        DropdownOption(value: 'IS', label: AppStrings.deptIs.tr()),
+        DropdownOption(value: 'AI', label: AppStrings.deptAi.tr()),
+        DropdownOption(value: 'IT', label: AppStrings.deptIt.tr()),
+      ],
+      onChanged: (value) => setState(() => _selectedDepartment = value),
+      validator: (val) =>
+          AppValidator.requiredSelection(val, AppStrings.selectDepartment),
+    );
+  }
+
+  Widget _semesterField() {
+    return CustomDropdownField<String>(
+      label: AppStrings.semester.tr(),
+      hint: AppStrings.semesterHint.tr(),
+      value: _selectedSemester,
+      items: [
+        DropdownOption(value: 'S1', label: AppStrings.semester1.tr()),
+        DropdownOption(value: 'S2', label: AppStrings.semester2.tr()),
+      ],
+      onChanged: (value) => setState(() => _selectedSemester = value),
+      validator: (val) =>
+          AppValidator.requiredSelection(val, AppStrings.selectSemester),
     );
   }
 }

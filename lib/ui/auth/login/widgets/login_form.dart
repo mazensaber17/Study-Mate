@@ -26,6 +26,8 @@ class _LoginFormState extends State<LoginForm> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   bool _isLoadingDialogOpen = false;
+  bool _isResetPasswordRequest = false;
+  String? _resetEmail;
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _LoginFormState extends State<LoginForm> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
+      _isResetPasswordRequest = false;
       context.read<LoginViewModel>().login(
         _emailController.text.trim(),
         _passwordController.text,
@@ -53,6 +56,8 @@ class _LoginFormState extends State<LoginForm> {
   void _onForgotPassword() {
     final input = _emailController.text.trim();
     if (input.isNotEmpty && input.contains('@')) {
+      _isResetPasswordRequest = true;
+      _resetEmail = input;
       context.read<LoginViewModel>().resetPassword(input);
       return;
     }
@@ -124,6 +129,8 @@ class _LoginFormState extends State<LoginForm> {
                   final email = emailController.text.trim();
                   if (email.isNotEmpty && email.contains('@')) {
                     Navigator.pop(bottomSheetContext);
+                    _isResetPasswordRequest = true;
+                    _resetEmail = email;
                     context.read<LoginViewModel>().resetPassword(email);
                   }
                 },
@@ -221,7 +228,10 @@ class _LoginFormState extends State<LoginForm> {
                 );
               } else if (state is LoginErrorState) {
                 if (state.isNetworkError) {
-                  await AuthFeedback.showNoInternet(context);
+                  await AuthFeedback.showNoInternet(
+                    context,
+                    onTryAgain: _retryLastRequest,
+                  );
                   return;
                 }
                 final message =
@@ -268,5 +278,16 @@ class _LoginFormState extends State<LoginForm> {
         ],
       ),
     );
+  }
+
+  Future<void> _retryLastRequest() async {
+    if (_isResetPasswordRequest) {
+      final email = _resetEmail;
+      if (email != null) {
+        await context.read<LoginViewModel>().resetPassword(email);
+      }
+      return;
+    }
+    _submit();
   }
 }

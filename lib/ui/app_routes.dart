@@ -23,7 +23,7 @@ class AppRoutes {
   static const String summarizer = '/summarizer';
   static const String settings = '/settings';
 
-  static final Map<String, WidgetBuilder> routes = {
+  static final Map<String, WidgetBuilder> _pageBuilders = {
     splash: (_) => const SplashScreen(),
     onboarding: (_) => const OnboardingScreen(),
     login: (_) => const LoginScreen(),
@@ -34,4 +34,42 @@ class AppRoutes {
     summarizer: (_) => const SummarizerScreen(),
     settings: (_) => const SettingsScreen(),
   };
+
+  static Map<String, WidgetBuilder> get routes => _pageBuilders;
+
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    final builder = _pageBuilders[settings.name];
+    if (builder == null) return null;
+
+    return PageRouteBuilder<void>(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          builder(context),
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 240),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        final slideAnimation = Tween<Offset>(
+          begin: const Offset(0.04, 0),
+          end: Offset.zero,
+        ).animate(curvedAnimation);
+        final fadeAnimation = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(curvedAnimation);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: SlideTransition(
+            position: slideAnimation,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 }

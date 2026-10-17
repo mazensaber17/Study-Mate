@@ -17,11 +17,11 @@ class RegistrationViewModel extends Cubit<RegistrationState> {
     required StudentModel student,
     required String password,
   }) async {
+    emit(const RegistrationLoadingState());
     if (!await NetworkService.hasInternetConnection()) {
       emit(const RegistrationErrorState(errorMessage: '', isNetworkError: true));
       return;
     }
-    emit(const RegistrationLoadingState());
     try {
       final response = await repository.registerStudent(
         student: student,
