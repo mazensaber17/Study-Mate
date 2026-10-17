@@ -8,6 +8,7 @@ import '../../../../utils/app_styles.dart';
 import '../../../../utils/app_validator.dart';
 import '../../../app_routes.dart';
 import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/auth_feedback.dart';
 import '../../../shared/widgets/primary_button.dart';
 import '../cubit/login_states.dart';
 import '../cubit/login_view_model.dart';
@@ -22,19 +23,20 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _collegeIdController;
+  late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  bool _isLoadingDialogOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _collegeIdController = TextEditingController();
+    _emailController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _collegeIdController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -42,14 +44,14 @@ class _LoginFormState extends State<LoginForm> {
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<LoginViewModel>().login(
-            _collegeIdController.text.trim(),
-            _passwordController.text,
-          );
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
     }
   }
 
   void _onForgotPassword() {
-    final input = _collegeIdController.text.trim();
+    final input = _emailController.text.trim();
     if (input.isNotEmpty && input.contains('@')) {
       context.read<LoginViewModel>().resetPassword(input);
       return;
@@ -82,7 +84,9 @@ class _LoginFormState extends State<LoginForm> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -134,25 +138,26 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color linkColor =
-        isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    final Color promptColor =
-        isDark ? AppColors.secondaryTextDark : AppColors.secondaryTextLight;
+    final Color linkColor = isDark
+        ? AppColors.primaryDark
+        : AppColors.primaryLight;
+    final Color promptColor = isDark
+        ? AppColors.secondaryTextDark
+        : AppColors.secondaryTextLight;
 
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // College ID / Email Field
+          // University email is Supabase Auth's sign-in identifier.
           CustomTextField(
-            label: AppStrings.collegeId.tr(),
-            hint: AppStrings.collegeIdHint.tr(),
-            controller: _collegeIdController,
-            validator: AppValidator.collegeId,
+            label: AppStrings.universityEmail.tr(),
+            hint: AppStrings.universityEmailHint.tr(),
+            controller: _emailController,
+            validator: AppValidator.email,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            inputFormatters: AppValidator.collegeIdFormatters(),
           ),
           const SizedBox(height: 16),
 
@@ -188,32 +193,42 @@ class _LoginFormState extends State<LoginForm> {
 
           // Sign In Action Button
           BlocConsumer<LoginViewModel, LoginState>(
-            listener: (context, state) {
+            listener: (context, state) async {
+              if (state is LoginLoadingState) {
+                if (!_isLoadingDialogOpen) {
+                  _isLoadingDialogOpen = true;
+                  AuthFeedback.showLoading(context, message: 'Signing in...');
+                }
+                return;
+              }
+
+              if (_isLoadingDialogOpen) {
+                Navigator.of(context, rootNavigator: true).pop();
+                _isLoadingDialogOpen = false;
+              }
+
               if (state is LoginSuccessState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppStrings.signInSuccess.tr()),
-                    backgroundColor: AppColors.primaryLight,
-                  ),
+                await AuthFeedback.showSuccess(
+                  context,
+                  message: AppStrings.signInSuccess.tr(),
                 );
+                if (!context.mounted) return;
                 Navigator.of(context).pushReplacementNamed(AppRoutes.home);
               } else if (state is PasswordResetSentState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppStrings.resetPasswordSent.tr()),
-                    backgroundColor: AppColors.primaryLight,
-                  ),
+                await AuthFeedback.showSuccess(
+                  context,
+                  message: AppStrings.resetPasswordSent.tr(),
                 );
               } else if (state is LoginErrorState) {
-                final message = state.errorMessage == AppStrings.invalidCredentials
+                if (state.isNetworkError) {
+                  await AuthFeedback.showNoInternet(context);
+                  return;
+                }
+                final message =
+                    state.errorMessage == AppStrings.invalidCredentials
                     ? state.errorMessage.tr()
                     : state.errorMessage;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(message),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                await AuthFeedback.showError(context, message: message);
               }
             },
             builder: (context, state) {
@@ -239,9 +254,8 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pushReplacementNamed(
-                      AppRoutes.registration,
-                    );
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.registration);
                   },
                   child: Text(
                     AppStrings.signUp.tr(),

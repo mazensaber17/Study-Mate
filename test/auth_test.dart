@@ -62,9 +62,11 @@ class AuthTestAssetLoader extends AssetLoader {
     'sign_up_success': 'Account created successfully!',
     'sign_in_success': 'Signed in successfully!',
     'invalid_credentials': 'Invalid credentials. Please verify your College ID/Email and password.',
-    'college_id_not_found': 'College ID not found. Please register or enter your University Email.',
+    'college_id_not_found':
+        'College ID not found. Please register or enter your University Email.',
     'reset_password_sent': 'Password reset link sent to your email.',
-    'enter_email_for_reset': 'Please enter your university email to reset your password.',
+    'enter_email_for_reset':
+        'Please enter your university email to reset your password.',
   };
 
   @override
@@ -104,7 +106,7 @@ void main() {
     try {
       await Supabase.initialize(
         url: AppConfig.supabaseUrl,
-        anonKey: AppConfig.supabaseAnonKey,
+        publishableKey: AppConfig.supabaseAnonKey,
       );
     } catch (_) {}
   });
@@ -188,7 +190,7 @@ void main() {
 
       expect(find.text('StudyMate'), findsWidgets);
       expect(find.text('Sign in'), findsWidgets);
-      expect(find.text('COLLEGE ID'), findsOneWidget);
+      expect(find.text('UNIVERSITY EMAIL'), findsOneWidget);
       expect(find.text('PASSWORD'), findsOneWidget);
       expect(find.text('Forgot password?'), findsOneWidget);
       expect(find.text("Don't have an account? "), findsOneWidget);
@@ -226,7 +228,9 @@ void main() {
       expect(find.text('Already have an account? '), findsOneWidget);
     });
 
-    testWidgets('validates required registration fields on submit', (tester) async {
+    testWidgets('validates required registration fields on submit', (
+      tester,
+    ) async {
       await tester.pumpWidget(createAuthTestApp(const RegistrationScreen()));
       await tester.pumpAndSettle();
 

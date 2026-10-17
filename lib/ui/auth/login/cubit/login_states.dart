@@ -13,9 +13,10 @@ class LoginLoadingState extends LoginState {
 }
 
 class LoginErrorState extends LoginState {
-  const LoginErrorState({required this.errorMessage});
+  const LoginErrorState({required this.errorMessage, this.isNetworkError = false});
 
   final String errorMessage;
+  final bool isNetworkError;
 }
 
 class LoginSuccessState extends LoginState {

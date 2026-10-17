@@ -37,24 +37,6 @@ class AuthRepository {
         },
       );
 
-      final user = response.user;
-      if (user != null) {
-        try {
-          // Sync with the profiles table in Supabase
-          await client.from('profiles').upsert({
-            'id': user.id,
-            'full_name': student.fullName,
-            'college_id': student.collegeId,
-            'email': email,
-            'major': student.department,
-            'semester': student.semester,
-            'updated_at': DateTime.now().toIso8601String(),
-          });
-        } catch (_) {
-          // If profiles table has RLS or specific schema, auth user_metadata is already saved
-        }
-      }
-
       return response;
     } on AuthException catch (e) {
       throw _mapAuthException(e);
@@ -63,41 +45,14 @@ class AuthRepository {
     }
   }
 
-  /// Sign in using either College ID or University Email + Password
+  /// Sign in with the email registered in Supabase Auth.
   Future<AuthResponse> signIn({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
-    final cleanIdentifier = identifier.trim();
-    String email = cleanIdentifier;
-
-    // If identifier doesn't have an @, look up email by college_id
-    if (!cleanIdentifier.contains('@')) {
-      try {
-        final profileRes = await client
-            .from('profiles')
-            .select('email')
-            .eq('college_id', cleanIdentifier)
-            .maybeSingle();
-
-        if (profileRes != null && profileRes['email'] != null) {
-          email = profileRes['email'] as String;
-        } else {
-          throw const AuthException(
-            'College ID not found. Please register or enter your university email.',
-          );
-        }
-      } on AuthException {
-        rethrow;
-      } catch (_) {
-        // Fallback: try identifier directly in case user entered username/email
-        email = cleanIdentifier;
-      }
-    }
-
     try {
       final response = await client.auth.signInWithPassword(
-        email: email,
+        email: email.trim().toLowerCase(),
         password: password,
       );
       return response;
@@ -151,6 +106,9 @@ class AuthRepository {
       return const AuthException(
         'Please confirm your email before signing in.',
       );
+    }
+    if (msg.contains('password should be at least')) {
+      return const AuthException('Password must be at least 6 characters.');
     }
     return error;
   }

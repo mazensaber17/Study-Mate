@@ -13,9 +13,13 @@ class RegistrationLoadingState extends RegistrationState {
 }
 
 class RegistrationErrorState extends RegistrationState {
-  const RegistrationErrorState({required this.errorMessage});
+  const RegistrationErrorState({
+    required this.errorMessage,
+    this.isNetworkError = false,
+  });
 
   final String errorMessage;
+  final bool isNetworkError;
 }
 
 class RegistrationSuccessState extends RegistrationState {
@@ -23,4 +27,6 @@ class RegistrationSuccessState extends RegistrationState {
 
   final User? user;
   final Session? session;
+
+  bool get requiresEmailConfirmation => user != null && session == null;
 }

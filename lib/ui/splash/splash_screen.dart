@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_strings.dart';
 import '../../utils/app_styles.dart';
 import '../../utils/assets_manager.dart';
+import '../../utils/local_storage.dart';
 import '../app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,7 +27,13 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _timer = Timer(const Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
+        final hasSession = Supabase.instance.client.auth.currentSession != null;
+        final destination = hasSession
+            ? AppRoutes.home
+            : AppLocalStorage.hasCompletedOnboarding
+            ? AppRoutes.login
+            : AppRoutes.onboarding;
+        Navigator.of(context).pushReplacementNamed(destination);
       }
     });
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graduation_project/ui/app_routes.dart';
 import 'package:graduation_project/utils/app_config.dart';
+import 'package:graduation_project/utils/local_storage.dart';
 import 'package:graduation_project/utils/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,11 +12,12 @@ import 'utils/my_bloc_observer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await AppLocalStorage.initialize();
 
   try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
-      anonKey: AppConfig.supabaseAnonKey,
+      publishableKey: AppConfig.supabaseAnonKey,
     );
   } catch (_) {
     // Already initialized or mocked in test environment
