@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation_project/ui/app_routes.dart';
+import 'package:graduation_project/ui/auth/registration/registration_screen.dart';
 import 'package:graduation_project/ui/onboarding/onboarding_screen.dart';
 import 'package:graduation_project/utils/app_strings.dart';
 import 'package:graduation_project/utils/app_theme.dart';
@@ -233,7 +234,7 @@ void main() {
       await tester.tap(find.text('تخطي'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Registration'), findsOneWidget);
+      expect(find.byType(RegistrationScreen), findsOneWidget);
     });
 
     testWidgets('Arabic Splash screen transitions automatically to Arabic Onboarding',

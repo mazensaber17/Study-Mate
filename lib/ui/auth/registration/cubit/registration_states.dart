@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 abstract class RegistrationState {
   const RegistrationState();
 }
@@ -17,5 +19,8 @@ class RegistrationErrorState extends RegistrationState {
 }
 
 class RegistrationSuccessState extends RegistrationState {
-  const RegistrationSuccessState();
+  const RegistrationSuccessState({this.user, this.session});
+
+  final User? user;
+  final Session? session;
 }

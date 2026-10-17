@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'auth/login/login_screen.dart';
 import 'auth/registration/registration_screen.dart';
 import 'home/chat_ai/chat_ai_screen.dart';
 import 'home/home_screen.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
 
   static const String splash = '/';
   static const String onboarding = '/onboarding';
+  static const String login = '/login';
   static const String registration = '/registration';
   static const String home = '/home';
   static const String news = '/news';
@@ -24,6 +26,7 @@ class AppRoutes {
   static final Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
     onboarding: (_) => const OnboardingScreen(),
+    login: (_) => const LoginScreen(),
     registration: (_) => const RegistrationScreen(),
     home: (_) => const HomeScreen(),
     news: (_) => const NewsScreen(),

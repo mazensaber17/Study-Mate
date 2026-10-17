@@ -9,6 +9,8 @@ class AppColors {
   static const Color backgroundDark = Color(0xFF131417);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1B1C22);
+  static const Color cardLight = Color(0xFFF8F9FD);
+  static const Color cardDark = Color(0xFF17181F);
   static const Color raisedLight = Color(0xFFEEEFFC);
   static const Color raisedDark = Color(0xFF242739);
   static const Color textLight = Color(0xFF131417);
@@ -21,4 +23,5 @@ class AppColors {
   static const Color darkBadgeAccent = Color(0xFF4B54B4);
   static const Color splashDarkBackground = Color(0xFF121316);
   static const Color splashMarkBackground = Color(0xFF0B0C10);
+  static const Color error = Color(0xFFE53935);
 }
