@@ -3,6 +3,12 @@ import 'package:dio/dio.dart';
 import 'api_constants.dart';
 
 class ApiManager {
+  ApiManager() {
+    dio.options
+      ..connectTimeout = ApiConstants.connectTimeout
+      ..receiveTimeout = ApiConstants.receiveTimeout;
+  }
+
   final dio = Dio();
 
   Future<Response> getData(

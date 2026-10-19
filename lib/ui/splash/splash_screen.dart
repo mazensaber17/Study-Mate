@@ -21,21 +21,30 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _timer;
+  bool _isExiting = false;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer(const Duration(seconds: 2), () {
       if (mounted) {
-        final hasSession = Supabase.instance.client.auth.currentSession != null;
-        final destination = hasSession
-            ? AppRoutes.home
-            : AppLocalStorage.hasCompletedOnboarding
-            ? AppRoutes.login
-            : AppRoutes.onboarding;
-        Navigator.of(context).pushReplacementNamed(destination);
+        _navigateToNextScreen();
       }
     });
+  }
+
+  Future<void> _navigateToNextScreen() async {
+    setState(() => _isExiting = true);
+    await Future<void>.delayed(const Duration(milliseconds: 280));
+
+    if (!mounted) return;
+    final hasSession = Supabase.instance.client.auth.currentSession != null;
+    final destination = hasSession
+        ? AppRoutes.home
+        : AppLocalStorage.hasCompletedOnboarding
+        ? AppRoutes.login
+        : AppRoutes.onboarding;
+    Navigator.of(context).pushReplacementNamed(destination);
   }
 
   @override
@@ -52,28 +61,38 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: isDark
           ? AppColors.splashDarkBackground
           : AppColors.backgroundLight,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const _StudyMateMark(),
-            const SizedBox(height: 18),
-            Text(
-              'StudyMate',
-              style: AppStyles.brand.copyWith(
-                color: isDark ? AppColors.textDark : AppColors.textLight,
-              ),
+      body: AnimatedScale(
+        scale: _isExiting ? 0.94 : 1,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeInCubic,
+        child: AnimatedOpacity(
+          opacity: _isExiting ? 0 : 1,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInCubic,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const _StudyMateMark(),
+                const SizedBox(height: 18),
+                Text(
+                  'StudyMate',
+                  style: AppStyles.brand.copyWith(
+                    color: isDark ? AppColors.textDark : AppColors.textLight,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  AppStrings.smartCampus.tr(),
+                  style: AppStyles.caption.copyWith(
+                    color: isDark
+                        ? AppColors.secondaryTextDark
+                        : AppColors.secondaryTextLight,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              AppStrings.smartCampus.tr(),
-              style: AppStyles.caption.copyWith(
-                color: isDark
-                    ? AppColors.secondaryTextDark
-                    : AppColors.secondaryTextLight,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

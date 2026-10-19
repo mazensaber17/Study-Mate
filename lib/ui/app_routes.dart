@@ -45,8 +45,8 @@ class AppRoutes {
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) =>
           builder(context),
-      transitionDuration: const Duration(milliseconds: 320),
-      reverseTransitionDuration: const Duration(milliseconds: 240),
+      transitionDuration: const Duration(milliseconds: 460),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curvedAnimation = CurvedAnimation(
           parent: animation,
@@ -61,12 +61,19 @@ class AppRoutes {
           begin: 0,
           end: 1,
         ).animate(curvedAnimation);
+        final scaleAnimation = Tween<double>(
+          begin: 0.98,
+          end: 1,
+        ).animate(curvedAnimation);
 
         return FadeTransition(
           opacity: fadeAnimation,
-          child: SlideTransition(
-            position: slideAnimation,
-            child: child,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            child: SlideTransition(
+              position: slideAnimation,
+              child: child,
+            ),
           ),
         );
       },

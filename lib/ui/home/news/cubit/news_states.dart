@@ -1,3 +1,5 @@
+import '../../../../model/news_model.dart';
+
 abstract class NewsState {
   const NewsState();
 }
@@ -11,11 +13,17 @@ class NewsLoadingState extends NewsState {
 }
 
 class NewsErrorState extends NewsState {
-  const NewsErrorState({required this.errorMessage});
+  const NewsErrorState({
+    required this.errorMessage,
+    this.isNetworkError = false,
+  });
 
   final String errorMessage;
+  final bool isNetworkError;
 }
 
 class NewsSuccessState extends NewsState {
-  const NewsSuccessState();
+  const NewsSuccessState(this.news);
+
+  final List<NewsModel> news;
 }
