@@ -12,6 +12,7 @@ import '../../../shared/widgets/custom_dropdown_field.dart';
 import '../../../shared/widgets/auth_feedback.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../widgets/staggered_form_content.dart';
 import '../cubit/registration_states.dart';
 import '../cubit/registration_view_model.dart';
 
@@ -96,8 +97,7 @@ class _AuthFormState extends State<AuthForm> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isCompact = constraints.maxWidth < 400;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          return StaggeredFormContent(
             children: [
               // 1. Full Name
               CustomTextField(

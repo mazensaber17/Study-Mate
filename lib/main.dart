@@ -6,7 +6,6 @@ import 'package:graduation_project/utils/app_config.dart';
 import 'package:graduation_project/utils/local_storage.dart';
 import 'package:graduation_project/utils/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'utils/my_bloc_observer.dart';
 import 'utils/theme_controller.dart';
 

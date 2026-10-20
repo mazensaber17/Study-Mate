@@ -1,18 +1,12 @@
-import 'dart:ui' as ui;
-
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../utils/app_colors.dart';
-import '../../utils/app_strings.dart';
 import '../../utils/local_storage.dart';
 import '../app_routes.dart';
-import '../shared/widgets/responsive_content.dart';
 import 'models/onboarding_item.dart';
+import 'widgets/onboarding_bottom_controls.dart';
 import 'widgets/onboarding_header.dart';
-import 'widgets/onboarding_slide.dart';
+import 'widgets/onboarding_page_view.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -39,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _onNext() {
-    if (_currentPage < _items.length - 1) {
+    if (_currentPage < _items.length) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOutCubic,
@@ -58,24 +52,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final bool isLastPage = _currentPage == _items.length - 1;
+    final bool isLastPage = _currentPage == _items.length;
+    final bool isMaterialSelectionPage =
+        _currentPage == OnboardingPageView.materialSelectionPage;
 
     final Color backgroundColor = isDark
         ? AppColors.backgroundDark
         : AppColors.backgroundLight;
-    final Color buttonColor = isDark
-        ? AppColors.primaryDark
-        : AppColors.primaryLight;
-    final Color buttonTextColor = isDark ? AppColors.textLight : Colors.white;
-
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final horizontalPadding = ResponsiveContent.horizontalPaddingFor(
-              constraints.maxWidth,
-            );
             return Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 640),
@@ -90,121 +78,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         isLastPage: isLastPage,
                       ),
 
-                      // PageView with onboarding slides
                       Expanded(
-                        child: PageView.builder(
+                        child: OnboardingPageView(
                           controller: _pageController,
-                          itemCount: _items.length,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentPage = index;
-                            });
-                          },
-                          itemBuilder: (context, index) {
-                            return OnboardingSlide(
-                              item: _items[index],
-                              isActive: _currentPage == index,
-                            );
-                          },
+                          items: _items,
+                          currentPage: _currentPage,
+                          onPageChanged: (index) =>
+                              setState(() => _currentPage = index),
+                          onFinish: _finishOnboarding,
                         ),
                       ),
 
-                      // Bottom controls: Page indicator & Action button
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          horizontalPadding,
-                          0,
-                          horizontalPadding,
-                          28,
+                      if (!isMaterialSelectionPage)
+                        OnboardingBottomControls(
+                          controller: _pageController,
+                          pageCount: _items.length + 1,
+                          isLastPage: isLastPage,
+                          onNext: _onNext,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Smooth page indicator
-                            SmoothPageIndicator(
-                              controller: _pageController,
-                              count: _items.length,
-                              effect: ExpandingDotsEffect(
-                                dotHeight: 6,
-                                dotWidth: 6,
-                                expansionFactor: 3.6,
-                                spacing: 6,
-                                dotColor: isDark
-                                    ? AppColors.borderDark
-                                    : AppColors.borderLight,
-                                activeDotColor: isDark
-                                    ? AppColors.primaryDark
-                                    : AppColors.primaryLight,
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Bottom Action Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: _onNext,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: buttonColor,
-                                  foregroundColor: buttonTextColor,
-                                  elevation: 0,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    AnimatedSwitcher(
-                                      duration: const Duration(
-                                        milliseconds: 200,
-                                      ),
-                                      transitionBuilder: (child, animation) {
-                                        return FadeTransition(
-                                          opacity: animation,
-                                          child: SlideTransition(
-                                            position: Tween<Offset>(
-                                              begin: const Offset(0.08, 0),
-                                              end: Offset.zero,
-                                            ).animate(animation),
-                                            child: child,
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        isLastPage
-                                            ? AppStrings.getStarted.tr()
-                                            : AppStrings.next.tr(),
-                                        key: ValueKey<bool>(isLastPage),
-                                        style: GoogleFonts.spaceGrotesk(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Transform.flip(
-                                      flipX:
-                                          Directionality.of(context) ==
-                                          ui.TextDirection.rtl,
-                                      child: Icon(
-                                        Icons.arrow_forward_rounded,
-                                        size: 18,
-                                        color: buttonTextColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),

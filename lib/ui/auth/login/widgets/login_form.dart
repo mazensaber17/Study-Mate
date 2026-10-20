@@ -10,6 +10,7 @@ import '../../../app_routes.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/auth_feedback.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../widgets/staggered_form_content.dart';
 import '../cubit/login_states.dart';
 import '../cubit/login_view_model.dart';
 
@@ -154,8 +155,7 @@ class _LoginFormState extends State<LoginForm> {
 
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: StaggeredFormContent(
         children: [
           // University email is Supabase Auth's sign-in identifier.
           CustomTextField(
