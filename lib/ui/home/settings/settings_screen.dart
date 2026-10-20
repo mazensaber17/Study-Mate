@@ -8,13 +8,14 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_styles.dart';
 import '../../../utils/local_storage.dart';
 import '../../../utils/theme_controller.dart';
+import '../../app_routes.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/full_page_no_internet.dart';
 import 'cubit/settings_states.dart';
 import 'cubit/settings_view_model.dart';
 import 'widgets/settings_option_tile.dart';
 import 'widgets/settings_profile_header.dart';
-import 'widgets/settings_support_button.dart';
+import 'widgets/settings_sign_out_button.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -73,6 +74,8 @@ class _SettingsContent extends StatelessWidget {
                     : state is SettingsLoadedState
                     ? state.notificationsEnabled
                     : AppLocalStorage.notificationsEnabled;
+                final isSigningOut = state is SettingsLoadedState &&
+                    state.isSigningOut;
 
                 return Column(
                   children: [
@@ -111,7 +114,10 @@ class _SettingsContent extends StatelessWidget {
                           .setNotificationsEnabled,
                     ),
                     const SizedBox(height: 16),
-                    const SettingsSupportButton(),
+                    SettingsSignOutButton(
+                      isLoading: isSigningOut,
+                      onPressed: () => _signOut(context),
+                    ),
                   ],
                 );
               },
@@ -120,5 +126,34 @@ class _SettingsContent extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      await context.read<SettingsViewModel>().signOut();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Signed out successfully',
+          style: TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor:AppColors.primaryLight,
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      if (!context.mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to sign out. Please try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

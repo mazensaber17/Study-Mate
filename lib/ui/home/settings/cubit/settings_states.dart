@@ -7,9 +7,13 @@ class SettingsInitialState extends SettingsState {
 }
 
 class SettingsLoadedState extends SettingsState {
-  const SettingsLoadedState({required this.notificationsEnabled});
+  const SettingsLoadedState({
+    required this.notificationsEnabled,
+    this.isSigningOut = false,
+  });
 
   final bool notificationsEnabled;
+  final bool isSigningOut;
 }
 
 class SettingsLoadingState extends SettingsState {

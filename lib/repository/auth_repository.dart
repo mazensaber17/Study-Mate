@@ -28,14 +28,27 @@ class AuthRepository {
         email: email,
         password: password,
         data: {
-          'full_name': student.fullName,
+          'display_name': student.fullName,
           'college_id': student.collegeId,
-          'year': student.year,
-          'department': student.department,
+          'major': student.department,
           'semester': student.semester,
-          'university_email': email,
+          'email': email,
         },
       );
+
+      final user = response.user;
+      if (user != null) {
+        await client.from('profiles').upsert
+          ({
+          'id': user.id,
+          'display_name': student.fullName,
+          'college_id': student.collegeId,
+          'major': student.department,
+          'semester': student.semester,
+          'email': email,
+          'college_pass': password,
+        });
+      }
 
       return response;
     } on AuthException catch (e) {
@@ -76,7 +89,9 @@ class AuthRepository {
   Future<void> signOut() async {
     try {
       await client.auth.signOut();
-    } catch (_) {}
+    } on AuthException catch (e) {
+      throw _mapAuthException(e);
+    }
   }
 
   /// Returns current authenticated user
